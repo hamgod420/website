@@ -1,11 +1,9 @@
 {
   "ExpandedNodes": [
     "",
-    "\\src",
-    "\\src\\layouts",
     "\\src\\pages",
     "\\src\\pages\\projects"
   ],
-  "SelectedNode": "\\package.json",
+  "SelectedNode": "\\scripts",
   "PreviewInSolutionExplorer": false
 }
