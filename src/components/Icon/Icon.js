@@ -1,4 +1,4 @@
-import { classes } from 'utils/style';
+import { classes } from '../../utils/style';
 import styles from './Icon.module.css';
 import ArrowLeft from './svg/arrow-left.svg';
 import ArrowRight from './svg/arrow-right.svg';

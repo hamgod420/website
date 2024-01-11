@@ -1,9 +1,13 @@
 {
   "ExpandedNodes": [
     "",
+    "\\public\\static",
+    "\\scripts",
+    "\\src",
+    "\\src\\assets",
     "\\src\\pages",
     "\\src\\pages\\projects"
   ],
-  "SelectedNode": "\\scripts",
+  "SelectedNode": "\\src\\assets\\katakana-project.svg",
   "PreviewInSolutionExplorer": false
 }

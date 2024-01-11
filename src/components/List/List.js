@@ -1,4 +1,4 @@
-import { classes } from 'utils/style';
+import { classes } from '../../utils/style';
 import styles from './List.module.css';
 
 export const List = ({ ordered, children, className, ...rest }) => {

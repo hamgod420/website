@@ -1,4 +1,4 @@
-import { classes, cssProps, numToMs } from 'utils/style';
+import { classes, cssProps, numToMs } from '../../utils/style';
 import styles from './Divider.module.css';
 
 export const Divider = ({

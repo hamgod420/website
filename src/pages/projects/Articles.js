@@ -1,18 +1,18 @@
-import Barcode from 'assets/barcode.svg';
-import { Button } from 'components/Button';
-import { DecoderText } from 'components/DecoderText';
-import { Divider } from 'components/Divider';
-import { Footer } from 'components/Footer';
-import { Heading } from 'components/Heading';
-import { Image } from 'components/Image';
-import { Section } from 'components/Section';
-import { Text } from 'components/Text';
+import Barcode from '../../assets/barcode.svg';
+import { Button } from '../../components/Button';
+import { DecoderText } from '../../components/DecoderText';
+import { Divider } from '../../components/Divider';
+import { Footer } from '../../components/Footer';
+import { Heading } from '../../components/Heading';
+import { Image } from '../../components/Image';
+import { Section } from '../../components/Section';
+import { Text } from '../../components/Text';
 import { useReducedMotion } from 'framer-motion';
 import { useWindowSize } from 'hooks';
 import RouterLink from 'next/link';
 import { useState, useEffect } from 'react';
-import { formatDate } from 'utils/date';
-import { classes, cssProps } from 'utils/style';
+import { formatDate } from '../../utils/date';
+import { classes, cssProps } from '../../utils/style';
 import styles from './Articles.module.css';
 
 const ArticlesPost = ({
@@ -32,7 +32,7 @@ const ArticlesPost = ({
   useEffect(() => {
     setDateTime(formatDate(date));
   }, [date, dateTime]);
-  
+
   const handleMouseEnter = () => {
     setHovered(true);
   };
@@ -86,7 +86,7 @@ const ArticlesPost = ({
                 View Project
               </Button>
               <Text className={styles.timecode} size="s">
-                              {timecode}
+                {timecode}
               </Text>
             </div>
           </div>

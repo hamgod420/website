@@ -1,5 +1,5 @@
 import { Fragment } from 'react';
-import { classes } from 'utils/style';
+import { classes } from '../../utils/style';
 import styles from './Heading.module.css';
 
 export const Heading = ({

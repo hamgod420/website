@@ -1,18 +1,17 @@
-import profileKatakana from 'assets/katakana-profile.svg?url';
-import profileImgLarge from 'assets/profile-large.jpg';
-import profileImgPlaceholder from 'assets/profile-placeholder.jpg';
-import profileImg from 'assets/profile.jpg';
-import { Button } from 'components/Button';
-import { DecoderText } from 'components/DecoderText';
-import { Divider } from 'components/Divider';
-import { Heading } from 'components/Heading';
-import { Image } from 'components/Image';
-import { Link } from 'components/Link';
-import { Section } from 'components/Section';
-import { Text } from 'components/Text';
-import { Transition } from 'components/Transition';
+import profileImgLarge from '../../assets/profile-large.jpg';
+import profileImgPlaceholder from '../../assets/profile-placeholder.jpg';
+import profileImg from '../../assets/profile.jpg';
+import { Button } from '../../components/Button';
+import { DecoderText } from '../../components/DecoderText';
+import { Divider } from '../../components/Divider';
+import { Heading } from '../../components/Heading';
+import { Image } from '../../components/Image';
+import { Link } from '../../components/Link';
+import { Section } from '../../components/Section';
+import { Text } from '../../components/Text';
+import { Transition } from '../../components/Transition';
 import { Fragment, useState } from 'react';
-import { media } from 'utils/style';
+import { media } from '../../utils/style';
 import styles from './Profile.module.css';
 
 const ProfileText = ({ visible, titleId }) => (
@@ -21,15 +20,24 @@ const ProfileText = ({ visible, titleId }) => (
       <DecoderText text="Welcome!" start={visible} delay={500} />
     </Heading>
     <Text className={styles.description} data-visible={visible} size="l" as="p">
-      My name is Andy Yan and I am currently studying at the University of Waterloo for Honours Computer Science and seeking 2024 summer internships.
+      My name is Andy Yan and I am currently studying at the University of Waterloo for
+      Honours Computer Science and seeking 2024 summer internships.
     </Text>
     <Text className={styles.description} data-visible={visible} size="l" as="p">
-        I currently offer private 1 on 1 tutoring for students from grades 1 - 12 academic math and programming, contest math and programming to enhance their education and develop better mathematical and computational thSinking skills.
-        My teachings specialize in Canadian curriculums and <Link href="https://cemc.uwaterloo.ca/">CEMC</Link> (math and computer contests made by University of Waterloo) content. 
-        </Text >
-        <Text className={styles.description} data-visible={visible} size="l" as="p">
-        If you would like to arrange a lesson, check out my <Link href="https://www.superprof.ca/waterloo-computer-science-student-offering-tutoring-services-for-programming-java-for-contest-and-curriculum-levels.html">Superprof Profile</Link> and contact me asap!
-        </Text>
+      I currently offer private 1 on 1 tutoring for students from grades 1 - 12 academic
+      math and programming, contest math and programming to enhance their education and
+      develop better mathematical and computational thSinking skills. My teachings
+      specialize in Canadian curriculums and{' '}
+      <Link href="https://cemc.uwaterloo.ca/">CEMC</Link> (math and computer contests made
+      by University of Waterloo) content.
+    </Text>
+    <Text className={styles.description} data-visible={visible} size="l" as="p">
+      If you would like to arrange a lesson, check out my{' '}
+      <Link href="https://www.superprof.ca/waterloo-computer-science-student-offering-tutoring-services-for-programming-java-for-contest-and-curriculum-levels.html">
+        Superprof Profile
+      </Link>{' '}
+      and contact me asap!
+    </Text>
   </Fragment>
 );
 
@@ -90,9 +98,7 @@ export const Profile = ({ id, visible, sectionRef }) => {
                   viewBox="0 0 135 765"
                   className={styles.svg}
                   data-visible={visible}
-                >
-                  <use href={`${profileKatakana}#katakana-profile`} />
-                </svg>
+                ></svg>
               </div>
             </div>
           </div>

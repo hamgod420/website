@@ -1,6 +1,6 @@
-import { Footer } from 'components/Footer';
-import { Intro } from 'layouts/Home/Intro';
-import { Profile } from 'layouts/Home/Profile';
+import { Footer } from '../../components/Footer';
+import { Intro } from '../../layouts/Home/Intro';
+import { Profile } from '../../layouts/Home/Profile';
 
 import { useEffect, useRef, useState } from 'react';
 import styles from './Home.module.css';
@@ -41,11 +41,10 @@ export const Home = () => {
     );
 
     sections.forEach(section => {
-  if (section.current) {
-    sectionObserver.observe(section.current);
-  }
-});
-
+      if (section.current) {
+        sectionObserver.observe(section.current);
+      }
+    });
 
     indicatorObserver.observe(intro.current);
 

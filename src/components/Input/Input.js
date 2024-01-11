@@ -1,8 +1,8 @@
-import { Icon } from 'components/Icon';
-import { tokens } from 'components/ThemeProvider/theme';
-import { Transition } from 'components/Transition';
+import { Icon } from '../../components/Icon';
+import { tokens } from '../../components/ThemeProvider/theme';
+import { Transition } from '../../components/Transition';
 import { useId, useRef, useState } from 'react';
-import { classes, cssProps, msToNum } from 'utils/style';
+import { classes, cssProps, msToNum } from '../../utils/style';
 import styles from './Input.module.css';
 import { TextArea } from './TextArea';
 

@@ -1,6 +1,6 @@
 import RouterLink from 'next/link';
 import { forwardRef } from 'react';
-import { classes } from 'utils/style';
+import { classes } from '../../utils/style';
 import styles from './Link.module.css';
 
 // File extensions that can be linked to

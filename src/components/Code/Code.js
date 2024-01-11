@@ -1,8 +1,8 @@
-import { Button } from 'components/Button';
-import { Icon } from 'components/Icon';
-import { Text } from 'components/Text';
-import { useTheme } from 'components/ThemeProvider';
-import { Transition } from 'components/Transition';
+import { Button } from '../../components/Button';
+import { Icon } from '../../components/Icon';
+import { Text } from '../../components/Text';
+import { useTheme } from '../../components/ThemeProvider';
+import { Transition } from '../../components/Transition';
 import { useRef, useState } from 'react';
 import styles from './Code.module.css';
 

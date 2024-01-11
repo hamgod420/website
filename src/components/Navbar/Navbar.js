@@ -161,6 +161,7 @@ export const Navbar = () => {
                 className={styles.navLink}
                 aria-current={getCurrent(pathname)}
                 onClick={handleNavItemClick}
+                target="_blank"
               >
                 {label}
               </a>

@@ -1,11 +1,11 @@
-import notFoundPoster from 'assets/notfound.jpg';
-import notFoundVideo from 'assets/notfound.mp4';
-import { Button } from 'components/Button';
-import { DecoderText } from 'components/DecoderText';
-import { Heading } from 'components/Heading';
-import { Meta } from 'components/Meta';
-import { Text } from 'components/Text';
-import { Transition } from 'components/Transition';
+import notFoundPoster from '../../assets/notfound.jpg';
+import notFoundVideo from '../../assets/notfound.mp4';
+import { Button } from '../../components/Button';
+import { DecoderText } from '../../components/DecoderText';
+import { Heading } from '../../components/Heading';
+import { Meta } from '../../components/Meta';
+import { Text } from '../../components/Text';
+import { Transition } from '../../components/Transition';
 import { Fragment } from 'react';
 import styles from './404.module.css';
 

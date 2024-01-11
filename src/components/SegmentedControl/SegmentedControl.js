@@ -1,4 +1,4 @@
-import { VisuallyHidden } from 'components/VisuallyHidden';
+import { VisuallyHidden } from '../../components/VisuallyHidden';
 import {
   createContext,
   useCallback,

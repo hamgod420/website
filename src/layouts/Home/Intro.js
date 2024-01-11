@@ -1,17 +1,17 @@
-import ArrowDown from 'assets/arrow-down.svg';
-import { DecoderText } from 'components/DecoderText';
-import { Heading } from 'components/Heading';
-import { Section } from 'components/Section';
-import { useTheme } from 'components/ThemeProvider';
-import { tokens } from 'components/ThemeProvider/theme';
-import { Transition } from 'components/Transition';
-import { VisuallyHidden } from 'components/VisuallyHidden';
+import ArrowDown from '../../assets/arrow-down.svg';
+import { DecoderText } from '../../components/DecoderText';
+import { Heading } from '../../components/Heading';
+import { Section } from '../../components/Section';
+import { useTheme } from '../../components/ThemeProvider';
+import { tokens } from '../../components/ThemeProvider/theme';
+import { Transition } from '../../components/Transition';
+import { VisuallyHidden } from '../../components/VisuallyHidden';
 import { AnimatePresence } from 'framer-motion';
-import { useInterval, usePrevious, useScrollToHash } from 'hooks';
+import { useInterval, usePrevious, useScrollToHash } from '../../hooks';
 import dynamic from 'next/dynamic';
 import RouterLink from 'next/link';
 import { Fragment, useEffect, useState } from 'react';
-import { cssProps } from 'utils/style';
+import { cssProps } from '../../utils/style';
 import styles from './Intro.module.css';
 
 const DisplacementSphere = dynamic(() =>
@@ -68,37 +68,35 @@ export function Intro({ id, sectionRef, disciplines, scrollIndicatorHidden, ...r
                 <DecoderText text="Andy Yan" delay={300} />
               </h1>
               <Heading level={0} as="h2" className={styles.title}>
-                <VisuallyHidden className={styles.label}>
-                  {``}
-                </VisuallyHidden>
+                <VisuallyHidden className={styles.label}>{``}</VisuallyHidden>
                 <span aria-hidden className={styles.row}>
                   <span
                     className={styles.word}
                     data-status={status}
                     style={cssProps({ delay: tokens.base.durationXS })}
                   >
-                                      <AnimatePresence>
-                                          {disciplines.map(item => (
-                                              <Transition
-                                                  unmount
-                                                  in={item === currentDiscipline}
-                                                  timeout={{ enter: 2000, exit: 4000 }}
-                                                  key={item}
-                                              >
-                                                  {(visible, status) => (
-                                                      <span
-                                                          aria-hidden
-                                                          className={styles.word}
-                                                          data-plus={true}
-                                                          data-status={status}
-                                                          style={cssProps({ delay: tokens.base.durationL })}
-                                                      >
-                                                          {item}
-                                                      </span>
-                                                  )}
-                                              </Transition>
-                                          ))}
-                                      </AnimatePresence>
+                    <AnimatePresence>
+                      {disciplines.map(item => (
+                        <Transition
+                          unmount
+                          in={item === currentDiscipline}
+                          timeout={{ enter: 2000, exit: 4000 }}
+                          key={item}
+                        >
+                          {(visible, status) => (
+                            <span
+                              aria-hidden
+                              className={styles.word}
+                              data-plus={true}
+                              data-status={status}
+                              style={cssProps({ delay: tokens.base.durationL })}
+                            >
+                              {item}
+                            </span>
+                          )}
+                        </Transition>
+                      ))}
+                    </AnimatePresence>
                   </span>
                   <span className={styles.line} data-status={status} />
                 </span>

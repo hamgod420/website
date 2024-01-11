@@ -1,26 +1,26 @@
-import ArrowDown from 'assets/arrow-down.svg';
-import { Divider } from 'components/Divider';
-import { Footer } from 'components/Footer';
-import { Heading } from 'components/Heading';
-import { Image } from 'components/Image';
-import { Meta } from 'components/Meta';
-import { Section } from 'components/Section';
-import { Text } from 'components/Text';
-import { tokens } from 'components/ThemeProvider/theme';
-import { Transition } from 'components/Transition';
-import { useParallax, useScrollToHash } from 'hooks';
+import ArrowDown from '../../assets/arrow-down.svg';
+import { Divider } from '../../components/Divider';
+import { Footer } from '../../components/Footer';
+import { Heading } from '../../components/Heading';
+import { Image } from '../../components/Image';
+import { Meta } from '../../components/Meta';
+import { Section } from '../../components/Section';
+import { Text } from '../../components/Text';
+import { tokens } from '../../components/ThemeProvider/theme';
+import { Transition } from '../../components/Transition';
+import { useParallax, useScrollToHash } from '../../hooks';
 import RouterLink from 'next/link';
 import { useRef, useState, useEffect } from 'react';
-import { clamp } from 'utils/clamp';
-import { formatDate } from 'utils/date';
-import { cssProps, msToNum, numToMs } from 'utils/style';
+import { clamp } from '../../utils/clamp';
+import { formatDate } from '../../utils/date';
+import { cssProps, msToNum, numToMs } from '../../utils/style';
 import styles from './Post.module.css';
 
 export const Post = ({ children, title, date, abstract, banner, timecode, ogImage }) => {
   const scrollToHash = useScrollToHash();
   const imageRef = useRef();
   const [dateTime, setDateTime] = useState(null);
-  
+
   useEffect(() => {
     setDateTime(formatDate(date));
   }, [date, dateTime]);
@@ -86,7 +86,7 @@ export const Post = ({ children, title, date, abstract, banner, timecode, ogImag
               ))}
             </Heading>
             <div className={styles.details}>
-              <RouterLink href="#postContent">
+              {/* <RouterLink href="#postContent">
                 <a
                   className={styles.arrow}
                   aria-label="Scroll to post content"
@@ -94,7 +94,7 @@ export const Post = ({ children, title, date, abstract, banner, timecode, ogImag
                 >
                   <ArrowDown aria-hidden />
                 </a>
-              </RouterLink>
+              </RouterLink> */}
               <div className={styles.timecode}>{timecode}</div>
             </div>
           </div>

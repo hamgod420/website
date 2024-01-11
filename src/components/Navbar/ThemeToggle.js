@@ -1,5 +1,5 @@
-import { Button } from 'components/Button';
-import { useAppContext } from 'hooks';
+import { Button } from '../../components/Button';
+import { useAppContext } from '../../hooks';
 import { useId } from 'react';
 import styles from './ThemeToggle.module.css';
 

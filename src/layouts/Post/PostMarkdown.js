@@ -1,9 +1,9 @@
-import { Code } from 'components/Code';
-import { Heading } from 'components/Heading';
-import { Icon } from 'components/Icon';
-import { Link } from 'components/Link';
-import { List, ListItem } from 'components/List';
-import { Text } from 'components/Text';
+import { Code } from '../../components/Code';
+import { Heading } from '../../components/Heading';
+import { Icon } from '../../components/Icon';
+import { Link } from '../../components/Link';
+import { List, ListItem } from '../../components/List';
+import { Text } from '../../components/Text';
 import { Children } from 'react';
 import styles from './PostMarkdown.module.css';
 

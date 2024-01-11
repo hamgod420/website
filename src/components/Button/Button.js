@@ -1,9 +1,9 @@
-import { Icon } from 'components/Icon';
-import { Loader } from 'components/Loader';
-import { Transition } from 'components/Transition';
+import { Icon } from '../../components/Icon';
+import { Loader } from '../../components/Loader';
+import { Transition } from '../../components/Transition';
 import RouterLink from 'next/link';
 import { forwardRef } from 'react';
-import { classes } from 'utils/style';
+import { classes } from '../../utils/style';
 import styles from './Button.module.css';
 
 function isExternalLink(href) {
