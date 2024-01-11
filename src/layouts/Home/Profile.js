@@ -65,7 +65,7 @@ export const Profile = ({ id, visible, sectionRef }) => {
                 secondary
                 className={styles.button}
                 data-visible={visible}
-                href="/articles"
+                href="/projects"
                 icon="send"
               >
                 Check out my Projects!
