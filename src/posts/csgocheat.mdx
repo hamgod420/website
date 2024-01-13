@@ -9,14 +9,40 @@ import React from 'react';
 
 ## My Exploit
 
+[Github](https://github.com/hamgod420/Experimental-CSGO-cheat)
+
 I have a couple paragraphs below going in depth about hacking in Counter Strike. [Click here to read](#what-is-counter-strike)
 
 Since the game got redeployed, I am currently working on remaking my old cheat for the new version of Counter Strike 2.
 
-## Aim-bot
+Ever since I ran into a cheater in my own game back in 2018, I decided to join the ["hack vs hack"](#what-is-hvh-hack-vs-hack) community. I was a QA at [Aimware](https://aimware.net/) doing website maintainence and beta testing, along with writing Lua [scripts](#my-section) that enhance the exploit. I created this exploit for fun and to learn more about reverse engineering.
 
-<video autoPlay muted loop style={{ width: '100%' }}>
+## Aim-bot Demo
+
+On click, the exploit will aim on the enemy's head.
+
+<video autoPlay muted loop width="750" height="500">
   <source src="\static\aimbotdemo.mp4" type="video/mp4" />
+  Your browser does not support the video tag.
+</video>
+
+## Vision Assistance / ESP (Extra Sensory Perception) Demo
+
+Allows user to see through terrain.
+
+<video autoPlay muted loop width="750" height="500">
+  <source src="\static\espdemo.mp4" type="video/mp4" />
+  Your browser does not support the video tag.
+</video>
+
+## Anti-aim Demo
+
+Allows the user's model to spin incredibly fast.
+
+Also used Aim-bot to shoot enemies and Vision Assistance to view the game in third person.
+
+<video autoPlay muted loop width="750" height="500">
+  <source src="\static\antiaimdemo.mp4" type="video/mp4" />
   Your browser does not support the video tag.
 </video>
 
@@ -38,7 +64,7 @@ However, many people in this game like to cheat through external applications th
 
 In Counter Strike, there exists a community where the game is played out normally, but every user is equipped with their own exploit. The rules of Counter Strike aren't changed, but now we have cheaters fighting against cheaters hence the name hack vs hack.
 
-**How do you win?** You would assume that having an exploit would mean you are practically god and unkillable, however, that is wrong. How exploits work in Counter Strike is through the manipulation of game variables, such as; player position or environment physics. It is not like executing a command that would instantly kill an opponent conditionlessly. To win there usually 3 factors in play:
+**How do you win?** You would assume that having an exploit would mean you are practically god and unkillable, however, that is wrong. How exploits work in Counter Strike is through the manipulation of game variables, such as; player position or environment physics. It is not like executing a command that would instantly kill an opponent conditionlessly. To win there usually 4 factors in play:
 
 **Aim-bot**
 
@@ -57,3 +83,12 @@ Anti-aim can also come with "de-sync", where you create a ghost model of yoursel
 **Packet-Manipulation**
 
 Now this is an more advanced factor to consider. Since the game as been redeployed as Counter Strike 2, a lot of old features may not exist in todays game. However in the old version of Counter Strike, you could do crazy things like; fake-lag, shoot twice in one bullet, and fake-crouch. This is sometimes the difference maker between good and bad cheats.
+
+**Scripts**
+
+<a id="my-section"></a>
+Most well known cheats have a scripting system where you can use files to manipulate
+settings in your exploit. For example [Aimware](https://aimware.net/) uses Lua as their
+scripting lanaguage. This can be very effective since the values you set your hit-chance
+and min-dmg at are static, but a script could make it dynamic and adaptive to the given
+scenario. It can also enhance visuals and serve as macros.
