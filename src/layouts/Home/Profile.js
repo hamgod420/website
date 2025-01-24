@@ -21,7 +21,7 @@ const ProfileText = ({ visible, titleId }) => (
     </Heading>
     <Text className={styles.description} data-visible={visible} size="l" as="p">
       My name is Andy Yan and I am currently studying at the University of Waterloo for
-      Honours Computer Science and seeking 2024 summer internships.
+      Honours Computer Science and I am currently a Software Engineer Intern for the Germany Aerospace Centre (DLR). I am also currently seeking 2025 summer/fall internships.
     </Text>
     <Text className={styles.description} data-visible={visible} size="l" as="p">
       I currently offer private 1 on 1 tutoring for students from grades 1 - 12 academic
