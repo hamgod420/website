@@ -26,7 +26,7 @@ const ProfileText = ({ visible, titleId }) => (
     <Text className={styles.description} data-visible={visible} size="l" as="p">
       I currently offer private 1 on 1 tutoring for students from grades 1 - 12 academic
       math and programming, contest math and programming to enhance their education and
-      develop better mathematical and computational thSinking skills. My teachings
+      develop better mathematical and computational thinking skills. My teachings
       specialize in Canadian curriculums and{' '}
       <Link href="https://cemc.uwaterloo.ca/">CEMC</Link> (math and computer contests made
       by University of Waterloo) content.
