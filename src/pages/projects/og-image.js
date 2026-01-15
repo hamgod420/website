@@ -1,4 +1,5 @@
-const puppeteer = require('puppeteer');
+const puppeteer = require('puppeteer-core');
+const chromium = require('@sparticuz/chromium');
 const path = require('path');
 const fs = require('fs');
 const { createHash } = require('crypto');
@@ -23,7 +24,15 @@ export async function generateOgImage(props) {
     // file does not exists, so we create it
   }
 
-  const browser = await puppeteer.launch({ headless: true });
+  // Use Chromium binary for Vercel, fallback to system Chrome for local development
+  const isVercel = process.env.VERCEL || process.env.VERCEL_ENV;
+  const browser = await puppeteer.launch({
+    args: isVercel ? chromium.args : ['--no-sandbox', '--disable-setuid-sandbox'],
+    defaultViewport: isVercel ? chromium.defaultViewport : { width: 1200, height: 630 },
+    executablePath: isVercel ? await chromium.executablePath() : undefined,
+    headless: isVercel ? chromium.headless : true,
+  });
+
   const page = await browser.newPage();
   await page.setViewport({ width: 1200, height: 630 });
   await page.goto(url, { waitUntil: 'networkidle0' });
