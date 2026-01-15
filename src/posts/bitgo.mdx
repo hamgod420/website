@@ -1,0 +1,171 @@
+---
+title: My time at BitGo
+abstract: Dive into Custodial Lightning and Taproot Assets
+date: '2025-12-17'
+banner: /static/bitgoblogbackground.jpg
+---
+
+## Introduction
+
+For my third co-op, I worked at BitGo on the Bitcoin / Tier 1 Coins team, and it was truly an amazing experience that gave me a completely new perspective on crypto and the infrastructure that supports it.
+
+---
+
+## What is BitGo?
+
+So, what does BitGo actually do?
+
+BitGo is an **institutional crypto infrastructure company**, meaning it builds the secure backend services that companies use to **hold, move, exchange, and manage digital assets**.
+
+### Custody
+
+BitGo is a crypto custodian, meaning it holds customers’ private keys and stores crypto assets in wallets it controls. When customers want to transact, BitGo executes those transactions on their behalf while taking full responsibility for **security and compliance**, which is absolutely critical in the crypto space.
+
+### Wallet Infrastructure
+
+Interacting directly with blockchains is complex and error-prone. BitGo abstracts this complexity away by providing well-designed **APIs and SDKs** that allow customers to interact with crypto safely and seamlessly without needing to manage low-level blockchain details themselves.
+
+---
+
+## How BitGo Stands Apart
+
+BitGo stands apart from most consumer-facing crypto companies by focusing exclusively on **institutional-grade infrastructure** rather than retail products. Unlike companies you may be more familiar with—such as MetaMask, Binance, or Coinbase—that prioritize trading and end-user experience, BitGo provides the **secure backend systems** that large institutions rely on to custody, move, and manage crypto at scale.
+
+BitGo’s platform is built around **multi-signature security**, **policy-based controls**, **regulatory compliance**, and **API-driven integrations**. This allows large funds, exchanges, and banks to operate safely without exposing private keys or taking on unnecessary counterparty risk. In practice, BitGo functions less like a crypto app and more like a **financial infrastructure provider**, delivering the security, reliability, and governance required to manage billions of dollars in assets.
+
+---
+
+## My Work at BitGo
+
+So how did I contribute during my time at BitGo?
+
+As a member of the Bitcoin team, I was primarily exposed to the crypto-protocol and infrastructure side of the company. During the first half of my internship, I worked on **Lightning Services**, helping BitGo ship 
+[custodial Lightning Network support](https://www.bitgo.com/resources/blog/bitgo-adds-support-for-lightning-network-from-custody/).
+
+Click here for a walkthrough of what the Lightning Network is.
+
+Within Lightning Services, I worked mainly on **pagination**, which is the process of breaking large datasets into smaller, more manageable chunks (“pages”) instead of returning everything at once. This is especially important for APIs, since returning massive datasets—such as millions of wallets, invoices, payments, or channels—in a single response would cause serious performance, memory, and latency issues. Pagination enables faster responses, lower memory usage, and more efficient computation.
+
+Whenever changes are made to Lightning Services, corresponding updates must also be made to BitGo’s **Wallet Platform**, which powers the broader wallet infrastructure. I worked on API routing to ensure Lightning operations were correctly mapped, extended the Wallet Platform to support new Lightning features introduced by my team, and implemented a **break-glass tool** within BitGo’s admin tooling that disables all active Lightning nodes in case of an emergency.
+
+This work made up the first half of my internship. For the second half, I was assigned to lead the integration of the **Taproot Asset Protocol**.
+
+---
+
+## Taproot Assets (My Project at BitGo)
+
+If you’ve made it this far, you likely already have a solid understanding of both crypto and the Lightning Network. This project focuses on bringing together the **best of both worlds**.
+
+Taproot (BIP 341) was introduced in November 2021 as an upgrade to the Bitcoin protocol that allows tokens to be issued on top of Bitcoin **without modifying Bitcoin’s base layer**. This enables assets such as:
+
+- Stablecoins  
+- Tokens  
+- NFTs  
+
+to exist on Bitcoin while still benefiting from its security and decentralization. These assets are known as **Taproot Assets**.
+
+Ownership of Taproot Assets is cryptographically committed within a special Bitcoin output. Bitcoin itself does not explicitly “know” about the asset; however, Taproot Assets become powerful through their connection to off-chain software that understands a given UTXO represents ownership of an asset and enforces the asset’s rules cryptographically.
+
+---
+
+## How Taproot Assets Work as a Currency
+
+This is where we truly get the best of both worlds.
+
+In April 2022, the **Taproot Asset Protocol (TAP)** was introduced by Lightning Labs. TAP leverages the immutability of the Bitcoin blockchain alongside the speed and efficiency of the Lightning Network. The easiest way to understand how this works is to separate the **on-chain** and **off-chain** components.
+
+---
+
+### On-Chain
+
+The on-chain component is intentionally minimal. The Bitcoin blockchain is primarily used for two purposes.
+
+**Issuance (Minting)**  
+Issuance is the process of creating a new asset and anchoring its existence and ownership to a Bitcoin UTXO using Taproot. Taproot enables a special Pay-to-Taproot (P2TR) output that embeds a Merkle root, which serves as a cryptographic commitment to the asset’s full details. Once this output is created, the asset is considered successfully “born” under that UTXO.
+
+**Settlement**  
+Settlement occurs back on the Bitcoin blockchain once the asset exits the Lightning Network, similar to a standard Lightning transaction.
+
+---
+
+### Off-Chain
+
+This is where most of the complexity and innovation live. Bitcoin intentionally does not track token balances, enforce asset supply rules, or understand asset metadata, so these responsibilities are handled off-chain.
+
+**Asset Proofs** are cryptographic data that prove:
+- An asset was validly issued  
+- The asset belongs to a specific P2TR output  
+- The asset’s supply and transfer history are valid  
+
+These proofs include Merkle proofs, asset metadata, and references to the original Bitcoin UTXO. So where are these proofs stored? This is where the **Universe** comes in.
+
+The Universe is a decentralized, public, off-chain indexing service that stores asset details and proofs. Anyone can query a Universe to retrieve the necessary proofs (“receipts”) to validate a transaction without tracking all of the data themselves. Anyone can also run a Universe, and clients may connect to multiple Universes for redundancy, making the system decentralized and resilient.
+
+---
+
+## The Role of Lightning
+
+The **Lightning Network** is where all activity takes place. Transactions, invoices, and payments all occur on Lightning. Just like a standard Lightning transaction, Taproot Assets are moved onto Lightning channels, enabling fast and efficient transfers.
+
+What makes TAP particularly powerful is its **exchange capability**. On the Lightning Network, specialized nodes known as **edge nodes** can perform **atomic swaps**, effectively turning the network into a decentralized foreign exchange (FX) layer.
+
+**Example:**  
+If Andy wants to pay David $10 USD (L-USD) but David only accepts BTC, the payment can be routed through an edge node. That node atomically swaps L-USD for the equivalent amount of BTC and forwards the BTC to David, all within a single, trustless operation.
+
+With all of these components working in harmony, TAP introduces a new and powerful way to **mint, spend, exchange, and transact** an entirely new class of digital assets on Bitcoin.
+
+---
+
+## My Role in the Project
+
+My role was to lay the technical foundation for integrating the Taproot Asset Protocol into BitGo’s existing infrastructure.
+
+I authored and owned the **Technical Design Document (TDD)** for the TAP integration, outlining how BitGo could safely and reliably support this new service.
+
+I collaborated with [Voltage](https://voltage.cloud/) on node hosting, payment APIs, and Universe hosting, while also discussing how BitGo could bring TAP into production.
+
+A significant portion of my time was spent building a **full end-to-end test environment** for TAP, simulating nearly every stage of the Taproot Asset lifecycle.
+
+### Test Coverage Included
+
+**On-Chain Management**
+- Asset minting (genesis)
+- Asset burning
+- New issuance (grouping)
+- On-chain transfers
+- Address generation  
+
+**Lightning Integration (Layer 2 Operations)**
+- Channel funding with Taproot Assets
+- Asset liquidity checks
+- Channel closing  
+
+**Off-Chain Management**
+- Asset-denominated invoices
+- Basic asset payments
+- Payment success verification (balance checks)
+- Payment proof verification (Universe proofs)
+- Insufficient balance handling  
+
+**Universe & Integrity Security Layer**
+- Universe synchronization
+- Proof retrieval
+- Balance reconciliation  
+
+---
+
+## Development Environment
+
+I built this environment using a fully Dockerized regtest setup consisting of:
+- Bitcoin Core (regtest)
+- [litd](https://docs.lightning.engineering/lightning-network-tools/lightning-terminal/get-lit)
+- [LND](https://docs.lightning.engineering/lightning-network-tools/lnd)
+- [tapd](https://github.com/lightninglabs/taproot-assets)
+
+This environment created by my regtest Core and [Lightning Lab's](https://lightning.engineering/) daemons allows my team to simulate any TAP scenario locally within BitGo’s Lightning Services, laying a strong foundation for future Taproot Asset development.
+
+---
+
+That pretty much concludes my experience at BitGo. If you actually made it all the way down here, you must be really bored — or maybe you’re thinking about hiring me :>. I can’t share more details since much of my work is confidential, so I’ll leave it here. Thanks for reading!
+
+

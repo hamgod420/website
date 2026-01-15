@@ -42,7 +42,8 @@
   },
   "scripts": {
     "dev": "next dev",
-    "build": "next build && next export -o build/",
+    "build": "next build",
+    "build:export": "next build && next export -o build/",
     "start": "next start",
     "test": "echo 'write some tests'"
   },

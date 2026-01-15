@@ -5,7 +5,7 @@ export const navLinks = [
     },
     {
         label: 'Resume',
-        pathname: 'https://drive.google.com/file/d/165GuE5nlY_UU_1iyjBYHTkrj2EqmaIvk/view?usp=sharing',
+        pathname: 'https://drive.google.com/file/d/1PaLn6B894-WhvY97p35V8YjV82bVeVNm/view?usp=sharing',
     },
 ];
 
@@ -17,7 +17,7 @@ export const socialLinks = [
   },
   {
     label: 'LinkedIn',
-      url: 'https://www.linkedin.com/in/andy-yan-822864243/',
+      url: 'https://www.linkedin.com/in/andyjyan/',
     icon: 'figma',
   },
   {
