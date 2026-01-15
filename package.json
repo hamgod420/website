@@ -4,7 +4,7 @@
   "homepage": "andyyan.vercel.app",
   "description": "Portfolio site for Andy Yan",
   "repository": "https://github.com/hamgod420/website",
-  "author": "Andyy Yan <andyjyan@gmail.com>",
+  "author": "Andy Yan <andyjyan@gmail.com>",
   "devDependencies": {
     "@mapbox/rehype-prism": "^0.8.0",
     "@svgr/webpack": "^6.3.1",
@@ -42,6 +42,7 @@
   },
   "scripts": {
     "dev": "next dev",
+    "prebuild": "node ./scripts/generate-sitemap.js && node ./scripts/draco.js",
     "build": "next build",
     "build:export": "next build && next export -o build/",
     "start": "next start",
