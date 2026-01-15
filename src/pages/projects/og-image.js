@@ -1,5 +1,3 @@
-const puppeteer = require('puppeteer-core');
-const chromium = require('@sparticuz/chromium');
 const path = require('path');
 const fs = require('fs');
 const { createHash } = require('crypto');
@@ -25,22 +23,35 @@ export async function generateOgImage(props) {
   }
 
   // Use Chromium binary for Vercel, fallback to system Chrome for local development
+  // Dynamically import to avoid bundling issues
+  const puppeteer = require('puppeteer-core');
+  const chromium = require('@sparticuz/chromium-min');
   const isVercel = process.env.VERCEL || process.env.VERCEL_ENV;
-  const browser = await puppeteer.launch({
-    args: isVercel ? chromium.args : ['--no-sandbox', '--disable-setuid-sandbox'],
-    defaultViewport: isVercel ? chromium.defaultViewport : { width: 1200, height: 630 },
-    executablePath: isVercel ? await chromium.executablePath() : undefined,
-    headless: isVercel ? chromium.headless : true,
-  });
+  
+  try {
+    const browser = await puppeteer.launch({
+      args: isVercel 
+        ? [...chromium.args, '--no-sandbox', '--disable-setuid-sandbox']
+        : ['--no-sandbox', '--disable-setuid-sandbox'],
+      defaultViewport: isVercel ? chromium.defaultViewport : { width: 1200, height: 630 },
+      executablePath: isVercel ? await chromium.executablePath() : undefined,
+      headless: isVercel ? chromium.headless : true,
+    });
 
-  const page = await browser.newPage();
-  await page.setViewport({ width: 1200, height: 630 });
-  await page.goto(url, { waitUntil: 'networkidle0' });
-  const buffer = await page.screenshot();
-  await browser.close();
+    const page = await browser.newPage();
+    await page.setViewport({ width: 1200, height: 630 });
+    await page.goto(url, { waitUntil: 'networkidle0' });
+    const buffer = await page.screenshot();
+    await browser.close();
 
-  fs.mkdirSync(ogImageDir, { recursive: true });
-  fs.writeFileSync(imagePath, buffer);
+    fs.mkdirSync(ogImageDir, { recursive: true });
+    fs.writeFileSync(imagePath, buffer);
 
-  return publicPath;
+    return publicPath;
+  } catch (error) {
+    // If OG image generation fails (e.g., during build on Vercel), 
+    // return undefined to fall back to default OG image
+    console.warn('Failed to generate OG image:', error.message);
+    return undefined;
+  }
 }

@@ -4,7 +4,7 @@ const nextConfig = {
   trailingSlash: true,
   pageExtensions: ['page.js', 'api.js'],
 
-  webpack(config) {
+  webpack(config, { isServer }) {
     // ✅ Import `svg` files as React components (unless `?url` is used)
     config.module.rules.push({
       test: /\.svg$/,
@@ -29,6 +29,15 @@ const nextConfig = {
       test: /\.glsl$/,
       type: 'asset/source',
     });
+
+    // ✅ Exclude server-only packages from client bundle
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        '@sparticuz/chromium-min': false,
+        'puppeteer-core': false,
+      };
+    }
 
     return config;
   },
