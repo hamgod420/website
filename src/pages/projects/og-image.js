@@ -3,6 +3,14 @@ const fs = require('fs');
 const { createHash } = require('crypto');
 
 export async function generateOgImage(props) {
+  const isVercel = process.env.VERCEL || process.env.VERCEL_ENV;
+  
+  // Skip OG image generation on Vercel during build - it will use default OG image
+  // OG images can be generated on-demand via API route if needed
+  if (isVercel) {
+    return null;
+  }
+
   const params = new URLSearchParams(props);
   const url = `file:${path.join(
     process.cwd(),
@@ -22,20 +30,14 @@ export async function generateOgImage(props) {
     // file does not exists, so we create it
   }
 
-  // Use Chromium binary for Vercel, fallback to system Chrome for local development
-  // Dynamically import to avoid bundling issues
+  // Use Chromium binary for local development
   const puppeteer = require('puppeteer-core');
-  const chromium = require('@sparticuz/chromium-min');
-  const isVercel = process.env.VERCEL || process.env.VERCEL_ENV;
   
   try {
     const browser = await puppeteer.launch({
-      args: isVercel 
-        ? [...chromium.args, '--no-sandbox', '--disable-setuid-sandbox']
-        : ['--no-sandbox', '--disable-setuid-sandbox'],
-      defaultViewport: isVercel ? chromium.defaultViewport : { width: 1200, height: 630 },
-      executablePath: isVercel ? await chromium.executablePath() : undefined,
-      headless: isVercel ? chromium.headless : true,
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      defaultViewport: { width: 1200, height: 630 },
+      headless: true,
     });
 
     const page = await browser.newPage();
@@ -49,9 +51,8 @@ export async function generateOgImage(props) {
 
     return publicPath;
   } catch (error) {
-    // If OG image generation fails (e.g., during build on Vercel), 
-    // return undefined to fall back to default OG image
+    // If OG image generation fails, return null to fall back to default OG image
     console.warn('Failed to generate OG image:', error.message);
-    return undefined;
+    return null;
   }
 }

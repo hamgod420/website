@@ -53,8 +53,14 @@ export const getStaticProps = async ({ params }) => {
     timecode,
   });
 
+  const props = { code, frontmatter, timecode };
+  // Only include ogImage if it's not null (null means use default)
+  if (ogImage !== null) {
+    props.ogImage = ogImage;
+  }
+
   return {
-    props: { code, frontmatter, timecode, ogImage },
+    props,
     notFound: process.env.NODE_ENV === 'production' && frontmatter.draft,
   };
 };
