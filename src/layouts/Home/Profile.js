@@ -20,23 +20,29 @@ const ProfileText = ({ visible, titleId }) => (
       <DecoderText text="Welcome!" start={visible} delay={500} />
     </Heading>
     <Text className={styles.description} data-visible={visible} size="l" as="p">
-      My name is Andy Yan and I am currently studying at the University of Waterloo for
-      Honours Computer Science and seeking 2024 summer internships.
+      My name is Andy Yan and I&apos;m currently on my third year studying Honours Computer Science at the University of Waterloo.
+      
     </Text>
     <Text className={styles.description} data-visible={visible} size="l" as="p">
+      I interned at BitGo twice as a Software Engineer — first on Bitcoin / Lightning, then on Go Accounts. I wrote about both:{' '}
+      <Link href="/projects/bitgo/">first term</Link>
+      {' '}and{' '}
+      <Link href="/projects/bitgo2/">second term</Link>.
+    </Text>
+    {/* <Text className={styles.description} data-visible={visible} size="l" as="p">
       I currently offer private 1 on 1 tutoring for students from grades 1 - 12 academic
       math and programming, contest math and programming to enhance their education and
-      develop better mathematical and computational thSinking skills. My teachings
+      develop better mathematical and computational thinking skills. My teachings
       specialize in Canadian curriculums and{' '}
       <Link href="https://cemc.uwaterloo.ca/">CEMC</Link> (math and computer contests made
       by University of Waterloo) content.
-    </Text>
+    </Text> */}
     <Text className={styles.description} data-visible={visible} size="l" as="p">
-      If you would like to arrange a lesson, check out my{' '}
+      I also offer tutoring services if you are a student interested in contest math and programming or want some guidance for getting into Waterloo CS, checkout my tutoring profile{' '}
       <Link href="https://www.superprof.ca/waterloo-computer-science-student-offering-tutoring-services-for-programming-java-for-contest-and-curriculum-levels.html">
         Superprof Profile
       </Link>{' '}
-      and contact me asap!
+      and contact me personally if interested!
     </Text>
   </Fragment>
 );
@@ -90,6 +96,7 @@ export const Profile = ({ id, visible, sectionRef }) => {
                   placeholder={profileImgPlaceholder}
                   srcSet={[profileImg, profileImgLarge]}
                   sizes={`(max-width: ${media.mobile}px) 100vw, 480px`}
+                  alt="Andy Yan"
                 />
                 <svg
                   aria-hidden="true"

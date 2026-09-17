@@ -1,0 +1,20 @@
+---
+title: 'Crypto Explained by Me'
+abstract: This is me trying my best to explain cryptocurrency concepts from scratch
+date: '2025-12-01'
+banner: /static/hello-world-banner.jpg
+---
+
+## What is Bitcoin and how does it work?
+
+Will finish this eventually...
+
+## What is Lightning?
+
+First of All what is Lightning? The Lightning Network is a Layer-2 payment network built on top of Bitcoin allowing for instant and low-fee transactions. 
+
+While Bitcoin's base layer is super secure, it's super slow and unoptmized for fast and frequent payments. The Lightning Protocol solves this problem by bringing most transactions off-chain, while still relying on Bitcoin for the final settlement and security, keeping the integrity of a decentralized system.
+
+Lightning uses payment channels where two parties open a channel by locking Bitcoin in a shared on-chain transaction. Payments are exchanged instantly by updating the balances off-chain. When the channel closes, only the final balances are written back on-chain. People perform these exchanges on something called the Lighting Network which is essentially a graph of Lightning Nodes allowing anyone who's included in the network to transact with one another.
+
+Now what are BitGo's Lightning Services? BitGo provides Custodial Lightning wallets, meaning BitGo holds the Bitcoin and private keys on behalf of their customers allowing users to interact with Lightning through their own platform and APIs. BitGo partners with [Voltage](https://voltage.cloud/) to power their Lightning Network infrastructure. Voltage specializes in hosting and operating Lightning nodes, and channel operations and routing. This partnership allows customers to get custodial Lightning access without running nodes themselves enjoying the best of both worlds, security and speed.

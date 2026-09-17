@@ -13,6 +13,10 @@ import styles from './Navbar.module.css';
 import { ThemeToggle } from './ThemeToggle';
 import { navLinks, socialLinks } from './navData';
 
+function isExternalLink(href) {
+  return href?.includes('://');
+}
+
 export const Navbar = () => {
   const [current, setCurrent] = useState();
   const [target, setTarget] = useState();
@@ -154,19 +158,23 @@ export const Navbar = () => {
       <NavToggle onClick={() => dispatch({ type: 'toggleMenu' })} menuOpen={menuOpen} />
       <nav className={styles.nav}>
         <div className={styles.navList}>
-          {navLinks.map(({ label, pathname }) => (
-            <RouterLink href={pathname} scroll={false} key={label}>
-              <a
-                data-navbar-item
-                className={styles.navLink}
-                aria-current={getCurrent(pathname)}
-                onClick={handleNavItemClick}
-                target="_blank"
-              >
-                {label}
-              </a>
-            </RouterLink>
-          ))}
+          {navLinks.map(({ label, pathname }) => {
+            const isExternal = isExternalLink(pathname);
+            return (
+              <RouterLink href={pathname} scroll={false} key={label}>
+                <a
+                  data-navbar-item
+                  className={styles.navLink}
+                  aria-current={getCurrent(pathname)}
+                  onClick={handleNavItemClick}
+                  target={isExternal ? '_blank' : undefined}
+                  rel={isExternal ? 'noopener noreferrer' : undefined}
+                >
+                  {label}
+                </a>
+              </RouterLink>
+            );
+          })}
         </div>
         <NavbarIcons desktop />
       </nav>

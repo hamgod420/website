@@ -5,7 +5,7 @@ import { Profile } from '../../layouts/Home/Profile';
 import { useEffect, useRef, useState } from 'react';
 import styles from './Home.module.css';
 
-const disciplines = ['Software', 'FullStack', 'Game', 'Web', 'Desktop'];
+const disciplines = ['Software', 'Blockchain', 'Wallet','FullStack', 'Game'];
 
 export const Home = () => {
   const [visibleSections, setVisibleSections] = useState([]);

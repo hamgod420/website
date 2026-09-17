@@ -1,0 +1,123 @@
+---
+title: Back at BitGo
+abstract: Go Accounts — deposits, withdrawals, observability, and stablecoin fungibility
+date: '2026-09-17'
+banner: /static/bitgoblogbackground.jpg
+---
+
+## Introduction
+
+I went back to BitGo for another internship, this time on the **Go Accounts** team.
+
+My [first BitGo internship](/projects/bitgo/) was on Bitcoin, Lightning, and Taproot Assets — protocol and node infrastructure. This term was a different slice of the company: the services that actually **credit deposits, pay withdrawals, keep the ledger honest, and tell on-call whether money is moving**.
+
+It was still crypto, still institutional, and still the kind of work where a wrong state transition is not just a bug — it is a customer’s funds.
+
+---
+
+## Quick recap: BitGo
+
+BitGo is an **institutional crypto infrastructure company**. It holds customers’ private keys, moves assets under policy controls, and exposes APIs so funds, exchanges, and banks can operate without running a full chain stack themselves.
+
+If you want the longer “what is BitGo” version, I already wrote it [here](/projects/bitgo/). This post is about the product surface I lived in the second time around.
+
+---
+
+## What is Go Accounts?
+
+**Go Accounts** is BitGo Prime’s money-movement layer for off-chain / custodial balances.
+
+Two services sit at the center of that:
+
+**Withdraw-Deposit (WD)** is the orchestration service. Incoming chain events (deposits, confirmations, pending approvals) land here as webhooks. Outgoing withdrawals get approved, broadcast, and tracked through a pipeline of states. Admin tools freeze wallets, cancel stuck work, and reprocess events when something goes sideways.
+
+**Digital Asset Service (DAS)** is the ledger. It is the source of truth for balances, holds, backing accounts, and the book-entry postings that make a withdrawal or deposit *account* correctly — not just appear on a chain explorer.
+
+If WD is the air-traffic controller, DAS is the control tower’s books. Everything I worked on this term was some combination of **correctness**, **security**, **operability**, and **making those two systems easier to reason about**.
+
+---
+
+## Security
+
+A chunk of the term was closing high-severity auth and query issues on WD and related packages. I will not walk through payloads or routes here — the interesting part is the pattern.
+
+Admin-looking endpoints are not admin endpoints until they prove it. Freeze / thaw, backing-account creation, and similar mutations need real admin identity, permission checks, and a **trust-org** check so a caller cannot act on a wallet they do not own. Internal routes cannot treat `userId` / `enterpriseId` headers as gospel; those values only mean something after service-to-service auth.
+
+On the data side, user-controlled filters cannot be concatenated into SQL. Values go in as bound parameters. That is boring advice until it is the difference between a lookup helper and a database you no longer trust.
+
+I also spent time on the follow-through: regression tests that fail closed, OpenAPI / codec contracts that match the handlers, and cleanup when an auth change broke freeze/thaw in staging because the Wallet Platform call was no longer carrying the wallet’s trust org.
+
+Security work on a payments service is not a one-line middleware add. It is making the typed request, the route, the controller, and the tests all tell the same story.
+
+---
+
+## Event-driven deposits
+
+When I joined, incoming webhooks still had a leftover **synchronous** path next to the event-driven one. A feature flag in production had already made async the real path: enqueue the event, ack the webhook, process later. The sync branch was dead code that still had to be understood, tested, and accidentally preserved.
+
+I helped finish that migration:
+
+- Webhook handlers always enqueue and acknowledge — no more “if flag off, process inline.”
+- Polling and admin reprocess stopped hiding behind the same flag.
+- The flag itself, plus all the test stubs that pretended it still existed, came out.
+
+That sounds like a cleanup ticket until you look at *what* the async processor was still doing. It was routing on **which webhook arrived** (`transfer` vs `transfer_confirmed`) instead of **what the transfer actually is** after a fresh fetch from Wallet Platform.
+
+Events are not ordered. A stale “transfer” event can show up after a confirmation. If you trust the webhook lane, you can downgrade a confirmed deposit or skip a reversal. The target shape is the one admin reprocess already used in production: fetch the transfer, then run a **state-driven pipeline** that is idempotent across retries.
+
+I worked on unifying that pipeline so webhook processing, admin reprocess, and activity handlers share one path, gated on transfer state (and confirmation policy, including Lightning / accelerate cases) rather than webhook type. The long-term payoff is that out-of-order delivery stops being a special case you paper over in enqueue, and becomes something the cores already handle.
+
+---
+
+## Observability
+
+Go Accounts has a lot of metrics and, historically, not one place to look when something is on fire.
+
+I authored the **technical design** for a Go Accounts health dashboard and then helped turn that into real Grafana: a central view with drill-downs, instead of “hope you opened the right dashboard for this failure mode.”
+
+The questions we wanted answered in seconds:
+
+1. **Is WD / DAS healthy right now?**
+2. **Is the system actually doing work**, or are pods just up?
+3. **Is behavior normal**, or is a spike / stall emerging?
+4. **Where should on-call go next?**
+
+That meant error rates and pulses (so a 30-second storm is not smoothed into nothing), status-code mix, pod-level vs path-level 5xx, deposit and withdrawal **pipeline states**, stuck work, queue depth, and proof-of-functionality panels — throughput, volumes, money moving — not only CPU and replica count.
+
+Along the way I chased the unglamorous bugs that make dashboards lie: queue metrics missing from Prometheus because two copies of `prom-client` registered on different registries; age panels showing thousands of years because of a unit / query mistake; 5xx series that visually drowned 2xx even when the absolute rate was tiny. A dashboard that misleads is worse than no dashboard.
+
+I also wrote an operator-facing panel reference so the next person on-call does not have to reverse-engineer PromQL to know what a row means.
+
+---
+
+## Stablecoin fungibility
+
+The bigger product bet this term was **stablecoin fungibility**: treating USDC (or USDT) as one customer-facing balance even though the coins live on several chains — Solana, Polygon, BSC, Tron, and so on.
+
+Today, without that model, a Polygon withdrawal fails if the Polygon wallet is light, even if Solana is sitting on plenty of the same dollar. The goal is a unified debit for the customer, with BitGo moving inventory behind the scenes.
+
+That work has two tracks that I touched:
+
+**Inventory and ops.** If you are going to bridge and rebalance automatically, you need to see **(asset × chain)** cells: hot vs cold, in-flight bridges, drain rates, bands (healthy / warning / critical), and an alert feed with a recommended action. I wrote the TDD for the inventory dashboard and config store — matrix layout, cell drill-down, in-flight tracker, alert feed, and a validated config model (typed codecs + environment config) so alerting parameters are not tribal knowledge in a spreadsheet. I also provisioned Grafana for inventory heatmaps, drain trends, alert frequency, and bridge SLA.
+
+**Ledger and product mechanics.** Cross-chain withdrawals cannot magically debit a chain the customer does not hold on. Offsets have to be real DAS postings, customer funds stay uncommingled, and BitGo’s **reserve** (its own capital, not client balances) fronts shortfall. I implemented pieces of that surface: reserve account config and provisioning, fungibility / bridging config wired into DAS, and the pure **balance aggregation** layer — a token-family map, summing per-chain OFC balances into a unified asset, with decimal normalization and tests that do not need the whole service running.
+
+I was not the only author on the reserve TDD, and I did not ship the entire bridging system alone. I owned the dashboard/config design, a lot of the observability around it, and concrete implementation on config, reserve setup, and aggregation — the parts that make “one USDC balance” both operable and accountable.
+
+---
+
+## Reliability in the small
+
+Not every ticket is a TDD. Some of the most user-visible work is mapping a missing withdrawal cancel to **404 instead of 500**, re-enabling skipped WD tests so fiat / fee / deposit paths actually run, and making sure admin tools fail with the status code the UI can act on.
+
+Payments platforms rot when “we’ll unskip that later” and “the handler throws on not-found” pile up. Cleaning that up is part of the job.
+
+---
+
+## What I take from it
+
+First internship: Lightning and TAP — how value moves on Bitcoin’s edges.
+
+Second internship: Go Accounts — how an institution **books** that value, defends the APIs that move it, watches the pipes, and starts treating a dollar as a dollar across chains.
+
+I still cannot share internals, customers, or anything that would make a good incident report. If you read this far, you either care about custody infrastructure or you are considering hiring me. Either way: thanks for reading, and if you want the Bitcoin-protocol half of the story, start with the [first BitGo post](/projects/bitgo/).

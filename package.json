@@ -4,7 +4,7 @@
   "homepage": "andyjyan.ca",
   "description": "Portfolio site for Andy Yan",
   "repository": "https://github.com/hamgod420/website",
-  "author": "Andyy Yan <andyjyan@gmail.com>",
+  "author": "Andy Yan <andyjyan@gmail.com>",
   "devDependencies": {
     "@mapbox/rehype-prism": "^0.8.0",
     "@svgr/webpack": "^6.3.1",
@@ -18,7 +18,8 @@
     "postcss-flexbugs-fixes": "^5.0.2",
     "postcss-preset-env": "^7.7.2",
     "prettier": "^2.7.1",
-    "puppeteer": "^16.1.0",
+    "puppeteer-core": "^21.0.0",
+    "@sparticuz/chromium-min": "^119.0.0",
     "reading-time": "^1.5.0",
     "rehype-img-size": "^1.0.1",
     "rehype-preset-minify": "^6.0.0",
@@ -42,7 +43,9 @@
   },
   "scripts": {
     "dev": "next dev",
-    "build": "next build && next export -o build/",
+    "prebuild": "node ./scripts/generate-sitemap.js && node ./scripts/draco.js",
+    "build": "next build",
+    "build:export": "next build && next export -o build/",
     "start": "next start",
     "test": "echo 'write some tests'"
   },

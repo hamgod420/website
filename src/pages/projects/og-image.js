@@ -1,9 +1,16 @@
-const puppeteer = require('puppeteer');
 const path = require('path');
 const fs = require('fs');
 const { createHash } = require('crypto');
 
 export async function generateOgImage(props) {
+  const isVercel = process.env.VERCEL || process.env.VERCEL_ENV;
+  
+  // Skip OG image generation on Vercel during build - it will use default OG image
+  // OG images can be generated on-demand via API route if needed
+  if (isVercel) {
+    return null;
+  }
+
   const params = new URLSearchParams(props);
   const url = `file:${path.join(
     process.cwd(),
@@ -23,15 +30,29 @@ export async function generateOgImage(props) {
     // file does not exists, so we create it
   }
 
-  const browser = await puppeteer.launch({ headless: true });
-  const page = await browser.newPage();
-  await page.setViewport({ width: 1200, height: 630 });
-  await page.goto(url, { waitUntil: 'networkidle0' });
-  const buffer = await page.screenshot();
-  await browser.close();
+  // Use Chromium binary for local development
+  const puppeteer = require('puppeteer-core');
+  
+  try {
+    const browser = await puppeteer.launch({
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      defaultViewport: { width: 1200, height: 630 },
+      headless: true,
+    });
 
-  fs.mkdirSync(ogImageDir, { recursive: true });
-  fs.writeFileSync(imagePath, buffer);
+    const page = await browser.newPage();
+    await page.setViewport({ width: 1200, height: 630 });
+    await page.goto(url, { waitUntil: 'networkidle0' });
+    const buffer = await page.screenshot();
+    await browser.close();
 
-  return publicPath;
+    fs.mkdirSync(ogImageDir, { recursive: true });
+    fs.writeFileSync(imagePath, buffer);
+
+    return publicPath;
+  } catch (error) {
+    // If OG image generation fails, return null to fall back to default OG image
+    console.warn('Failed to generate OG image:', error.message);
+    return null;
+  }
 }

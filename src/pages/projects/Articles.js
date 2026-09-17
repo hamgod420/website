@@ -49,7 +49,7 @@ const ArticlesPost = ({
     >
       {featured && (
         <Text className={styles.postLabel} size="s">
-          In Progress
+          Featured
         </Text>
       )}
       {featured && !!banner && (
