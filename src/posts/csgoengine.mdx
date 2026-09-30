@@ -1,0 +1,181 @@
+---
+title: 'The Math and Systems Behind a CS:GO Exploit'
+abstract: Linear algebra, tick simulation, probabilistic search, and legacy C++ engine integration
+date: '2026-09-02'
+banner: /static/csgobanner.jpg
+---
+
+## My Exploit
+
+This is a retrospective on the engineering inside my old CS:GO project, not a guide to
+building or deploying a cheat. I wrote it to understand a real-time game loop: geometry,
+animation state, prediction, imperfect network history, and the cost of making decisions
+with stale data. The earlier [project overview](/projects/csgocheat) covers the context
+and motivation; here I want to look at how the code was put together and where its
+assumptions broke down.
+
+## A collection of systems around the game loop
+
+The project is organized by feature rather than as a clean engine library. `Hooks.cpp`
+connects callbacks such as `CreateMove` and `FrameStageNotify` to the game. On each
+movement command, `Hooks::CreateMove` captures the command and local player, then calls
+miscellaneous movement code, anti-aim, the main aimbot, and the separate legit bot before
+clamping the resulting view angles. Frame-stage work handles resolver updates and shot
+feedback. This made it easy to add a feature, but also meant that ordering and shared
+globals mattered: features communicate through objects like `g::pCmd`, `g::pLocalEntity`,
+and `g::bSendPacket` rather than through explicit inputs and outputs.
+
+`Aimbot.cpp` is the central decision pipeline. It stores player records, scans candidate
+hitboxes, evaluates damage, chooses a target, checks weapon readiness and spread, then
+updates the command. `Autowall.cpp` estimates whether a ray can reach a point through
+surfaces. `LagComp.cpp` keeps time-stamped bone snapshots. `Resolver.cpp` estimates an
+opponent's orientation, while `missed_calculation.cpp` sketches a pipeline for classifying
+misses from shot and impact records. These modules are connected, but the boundaries are porous: arrays,
+global state, and implicit engine timing are part of their interfaces.
+
+## From positions to angles
+
+The basic geometry starts with a source position and a candidate point. Their difference
+is a direction vector; its horizontal length and vertical component can be converted to
+pitch and yaw with `atan2`. Conversely, `Math::AngleVectors` converts pitch and yaw into
+a forward direction. A normalized direction can be traced through the world or extended
+to the weapon's range. `Math::VectorTransform` applies a 3-by-4 bone transform to a point
+in model space, adding translation after the rotation/scale terms.
+
+```text
+direction = target - eye_position
+yaw       = atan2(direction.y, direction.x)
+pitch     = atan2(-direction.z, length(direction.xy))
+world     = bone_rotation * local_point + bone_translation
+```
+
+The code contains multiple versions of these conversions. For example,
+`Math::CalcAngle` uses `atan` on component ratios and manually adjusts yaw, while another
+`VectorAngles` uses `atan2`; these approaches have different behavior around quadrants
+and zero-length horizontal vectors. The file also has more than one angle-normalization
+helper. This is a useful lesson from the project: in 3D code, a consistent coordinate
+convention and a small set of tested conversion functions are more valuable than having
+many convenient helpers. A sign error or a degree/radian mismatch can look like a targeting
+problem several modules downstream.
+
+## Bone matrices and hitboxes
+
+Player models define hitboxes in bone-local space. `CEntity.cpp`'s
+`GetHitboxPosition` reads a hitbox from the model's hitbox set, transforms its minimum
+and maximum points through the supplied bone matrix, and uses their midpoint as a simple
+aim point. Capsule hitboxes also have a radius, which the hitscan code uses to test
+additional points around the center. Those extra points can represent a larger target
+area, but more points mean more traces and more opportunities for inconsistent data.
+
+`Aimbot` owns a matrix array for up to 65 entity slots and 128 bones per entity. The
+current scan reads a matrix prepared for each player; `LagComp::StoreRecord` copies that
+matrix into a time-stamped record. This snapshot is essential: a hitbox center without
+the matching pose is not a historical hitbox. The tradeoff is memory and lifetime
+management. Fixed-size arrays encode assumptions about client and bone counts, and the
+correctness of a copied matrix depends on it being refreshed at the right frame stage.
+
+## Candidate scoring, spread, and damage
+
+`Hitscan` builds a candidate list from the configured hitboxes, optionally adding points
+around capsules. It asks `Autowall::Damage` for an estimated damage at each point, then
+keeps the best candidate that meets the minimum-damage rule. This is a small search
+problem: each extra hitbox or multipoint increases coverage but also increases work. A
+candidate is only as trustworthy as its pose, visibility trace, weapon data, and timing.
+
+The `HitChance` function approximates weapon inaccuracy by sampling spread and inaccuracy
+values, constructing a perturbed shot direction, and tracing it against the target. In
+other words, it estimates the fraction of sampled rays that intersect. The implementation
+uses a fixed number of samples (256 or 356) and can return early when the remaining samples
+cannot meet the requested threshold. That is a pragmatic approximation, not a probability
+guarantee: sample count controls cost and variance, and the random-number sequence and
+game's weapon state must match the model for the estimate to mean much.
+
+```text
+estimated_hit_chance = intersecting_sample_rays / total_sample_rays
+```
+
+`Autowall.cpp` models a bullet as a sequence of ray traces. It accumulates distance and
+range falloff, reads surface penetration properties, estimates damage lost when crossing
+a surface, and stops when the remaining damage or penetration budget is exhausted. The
+code has a particularly fragile dependency around the engine's trace-to-exit behavior.
+This model is useful for ranking candidate points, but its constants and surface rules
+are version-specific approximations; it should not be mistaken for a general-purpose
+physics simulation.
+
+## Time: prediction and historical records
+
+`LagComp.cpp` calculates an interpolation estimate from network settings and stores a
+player's simulation time, velocity, shot marker, and 128-bone matrix when simulation time
+changes. It checks records against an estimated latency window before using them to
+evaluate older poses. This is a form of temporal search: instead of reasoning only about
+the latest observed position, the code compares a small history of plausible server-time
+states.
+
+There is also an `EnginePrediction` module that saves and temporarily changes selected
+timing state, runs movement setup/process/finish, updates weapon accuracy, then attempts
+to restore state. However, the calls to `RunEnginePred` and `EndEnginePred` are commented
+out in `Hooks::CreateMove`, so that path is present in the repository but not active in
+the normal command flow. Its implementation also relies on hard-coded memory offsets and
+globals, and cleanup is conditional. That is technical debt, not a robust prediction
+boundary. Any rollback-style code should make saved state explicit and restore it on all
+exit paths; a partial restore can contaminate later simulation.
+
+The history code has similar sharp edges. Records use mutable deques indexed by entity
+slot, and pruning erases elements while iterating forward. Such loops need careful index
+adjustment or a removal algorithm that accounts for shifting elements. The code is a
+snapshot of exploratory work, not a production-quality temporal database. It has no
+strong typed record lifetime, and validity depends on engine timing, interpolation, and
+network conditions remaining close to the assumptions in the implementation.
+
+## The C++ techniques underneath
+
+Most feature code does not call a stable, documented gameplay API. The `SDK` directory
+defines small C++ facades for engine concepts such as entities, tracing, prediction, and
+model information. `Interfaces.cpp` discovers engine-owned interface objects and stores
+typed pointers to them; feature modules then program against those wrappers. This resembles
+dependency inversion at a distance, but the global pointers make dependencies implicit
+and let initialization order become part of correctness.
+
+The project also reconstructs runtime metadata. `NetvarManager.cpp` walks the engine's
+receive tables recursively and builds a tree of property names and offsets. Its `Node`
+objects use `shared_ptr`, while the root manager uses `unique_ptr`. That is more expressive
+than scattering raw ownership everywhere, although shared ownership is arguably broader
+than the tree requires. A value-owned tree or `unique_ptr` children would make lifetime
+and mutation easier to reason about.
+
+At the boundary, the code uses templates, function-pointer types, virtual-table wrappers,
+and `reinterpret_cast` to translate raw engine objects into C++ calls. Those are powerful
+systems techniques, but they do not create type safety: the compiler cannot verify that a
+runtime address has the layout or calling convention claimed by the cast. A client update
+can therefore turn a valid-looking pointer into undefined behavior without changing this
+project's source.
+
+The strongest modernization opportunity is resource and state ownership. Bone snapshots,
+prediction globals, hook lifetimes, and temporarily replaced timing values should be owned
+by objects with narrow scopes. In modern C++, a prediction-state guard could save values
+in its constructor and restore them in its destructor, making early returns safe. Replacing
+parallel fixed arrays with a `PlayerState` aggregate would also keep a player's history,
+miss counters, and matrices together instead of relying on every module to use the same
+entity index correctly.
+
+## Resolver feedback as a heuristic
+
+`Resolver.cpp` tracks lower-body yaw changes, movement, simulation time, and missed-shot
+counts to choose an estimated orientation. In broad terms, it treats movement and observed
+yaw updates as evidence, then changes its estimate after a miss. `missed_calculation.cpp`
+shows the intended shape of that feedback loop: shot snapshots and bullet impacts would be
+compared with the saved aim point and pose, then used to label a miss as likely spread or
+likely orientation error.
+
+That classifier is unfinished in this repository. The frame-stage hook invokes its
+processor, but the event path does not populate the shot and impact queues, and the saved
+pose is not actually used for a reliable intersection test. The design is therefore more
+interesting than the current execution: a measurement should update a heuristic and
+change the next estimate, but the code does not complete that chain.
+
+The limitation is that a miss is ambiguous evidence. Spread, stale animation, obstruction,
+latency, or a bad trace can all produce similar outcomes. The resolver code uses static
+per-player arrays and a handful of thresholds and angle offsets; it does not establish
+that any one cause was correct. Its labels should be read as guesses made by the code,
+not ground truth. This is where better instrumentation and explicit confidence would
+have helped more than adding another branch to the heuristic.

@@ -31,7 +31,7 @@ Two services sit at the center of that:
 
 **Withdraw-Deposit (WD)** is the orchestration service. Incoming chain events (deposits, confirmations, pending approvals) land here as webhooks. Outgoing withdrawals get approved, broadcast, and tracked through a pipeline of states. Admin tools freeze wallets, cancel stuck work, and reprocess events when something goes sideways.
 
-**Digital Asset Service (DAS)** is the ledger. It is the source of truth for balances, holds, backing accounts, and the book-entry postings that make a withdrawal or deposit *account* correctly — not just appear on a chain explorer.
+**Digital Asset Service (DAS)** is the ledger. It is the source of truth for balances, holds, backing accounts, and the book-entry postings that make a withdrawal or deposit _account_ correctly — not just appear on a chain explorer.
 
 If WD is the air-traffic controller, DAS is the control tower’s books. Everything I worked on this term was some combination of **correctness**, **security**, **operability**, and **making those two systems easier to reason about**.
 
@@ -61,7 +61,7 @@ I helped finish that migration:
 - Polling and admin reprocess stopped hiding behind the same flag.
 - The flag itself, plus all the test stubs that pretended it still existed, came out.
 
-That sounds like a cleanup ticket until you look at *what* the async processor was still doing. It was routing on **which webhook arrived** (`transfer` vs `transfer_confirmed`) instead of **what the transfer actually is** after a fresh fetch from Wallet Platform.
+That sounds like a cleanup ticket until you look at _what_ the async processor was still doing. It was routing on **which webhook arrived** (`transfer` vs `transfer_confirmed`) instead of **what the transfer actually is** after a fresh fetch from Wallet Platform.
 
 Events are not ordered. A stale “transfer” event can show up after a confirmation. If you trust the webhook lane, you can downgrade a confirmed deposit or skip a reversal. The target shape is the one admin reprocess already used in production: fetch the transfer, then run a **state-driven pipeline** that is idempotent across retries.
 
@@ -103,6 +103,18 @@ That work has two tracks that I touched:
 **Ledger and product mechanics.** Cross-chain withdrawals cannot magically debit a chain the customer does not hold on. Offsets have to be real DAS postings, customer funds stay uncommingled, and BitGo’s **reserve** (its own capital, not client balances) fronts shortfall. I implemented pieces of that surface: reserve account config and provisioning, fungibility / bridging config wired into DAS, and the pure **balance aggregation** layer — a token-family map, summing per-chain OFC balances into a unified asset, with decimal normalization and tests that do not need the whole service running.
 
 I was not the only author on the reserve TDD, and I did not ship the entire bridging system alone. I owned the dashboard/config design, a lot of the observability around it, and concrete implementation on config, reserve setup, and aggregation — the parts that make “one USDC balance” both operable and accountable.
+
+---
+
+## Ledger reliability: idempotency and caching
+
+I also wrote two DAS design proposals aimed at making the ledger safer and more efficient.
+
+The first was an **idempotency layer for Kafka posting events**. Kafka is intentionally at-least-once, so a retry, restart, or rebalance can deliver the same logical posting more than once. The design gives each posting a stable idempotency key, uses Redis to turn common duplicates into cheap no-ops, and adds a database uniqueness constraint as the final correctness backstop. The expected impact is straightforward but important: prevent duplicate balance mutations without making every normal posting pay the cost of an exception path.
+
+The second was a **cache-aside layer for point-in-time balances**. Historical balance queries repeatedly reconstruct the same answer from ledger entries, even after that point in history can no longer change. The design caches only timestamps older than a conservative safety watermark; recent balances still go directly to the database. That boundary matters more than the cache itself. It is intended to reduce repeated database work and improve reconciliation and statement-query latency without risking stale live balances or introducing a complicated invalidation system.
+
+Together, these projects capture a principle I kept returning to on Go Accounts: performance work in a financial system has to preserve correctness under retries, delayed events, partial failures, and stale data. A fast answer is only useful if it is still the right answer.
 
 ---
 
